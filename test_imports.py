@@ -3,7 +3,7 @@ import streamlit as st
 st.title("Test 1: Streamlit works")
 
 try:
-    import google.generativeai as genai
+    import google.genai as genai
     st.success("✅ google.generativeai imported successfully!")
 except Exception as e:
     st.error(f"❌ Error importing genai: {e}")
