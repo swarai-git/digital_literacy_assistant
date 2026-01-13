@@ -265,3 +265,55 @@ def create_annotated_text_html(original_text, suspicious_phrases):
     """
     
     return html_content
+
+
+def analyze_text_with_urls(text):
+    """
+    Enhanced analysis that includes URL checking
+    """
+    from utils.url_analyzer import URLAnalyzer
+    from utils.safe_browsing_checker import SafeBrowsingChecker
+    
+    # Get standard Gemini analysis
+    result = analyze_text(text)
+    
+    if not result["success"]:
+        return result
+    
+    # Extract and analyze URLs
+    urls = URLAnalyzer.extract_urls(text)
+    
+    if urls:
+        # Analyze URL structure
+        url_analyses = URLAnalyzer.batch_analyze_urls(urls)
+        
+        # Check against Safe Browsing (if API key available)
+        try:
+            sb_checker = SafeBrowsingChecker()
+            sb_result = sb_checker.check_urls(urls)
+        except Exception as e:
+            sb_result = {"error": str(e), "safe": None}
+        
+        # Add URL analysis to result
+        result["data"]["urls_found"] = len(urls)
+        result["data"]["url_analyses"] = url_analyses
+        result["data"]["safe_browsing_check"] = sb_result
+        
+        # Adjust overall score if dangerous URLs found
+        if not sb_result.get("safe", True):
+            result["data"]["overall_confidence_score"] = max(
+                result["data"]["overall_confidence_score"],
+                85  # High risk if Safe Browsing flags it
+            )
+            result["data"]["is_safe"] = False
+        
+        # Add high-risk URL flags
+        for url_analysis in url_analyses:
+            if url_analysis["risk_score"] >= 60:
+                result["data"]["red_flags"].append({
+                    "flag": f"Suspicious URL: {url_analysis['url'][:50]}...",
+                    "severity": "high",
+                    "explanation": f"URL scored {url_analysis['risk_score']}/100 risk"
+                })
+    
+    return result

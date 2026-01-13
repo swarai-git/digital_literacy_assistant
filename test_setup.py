@@ -11,7 +11,7 @@ st.write("Testing if everything works...")
 # Test Gemini API
 if st.button("Test Gemini API"):
     try:
-        import google.generativeai as genai
+        import google.genai as genai
         
         api_key = os.getenv("GEMINI_API_KEY")
         st.write(f"✅ API Key found: {api_key[:15]}...")

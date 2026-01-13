@@ -7,3 +7,9 @@ PyPDF2
 python-docx
 Pillow
 pytesseract
+pandas
+numpy
+scikit-learn
+matplotlib
+seaborn
+nltk
